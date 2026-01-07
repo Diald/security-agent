@@ -1,0 +1,56 @@
+{
+  "summary": {
+    "status": "FAIL",
+    "score": 300,
+    "reasons": [
+      "Hardcoded secret detected"
+    ]
+  },
+  "findings": [
+    {
+      "source": "trufflehog",
+      "category": "secret",
+      "severity": "critical",
+      "confidence": "high",
+      "identifier": "1039",
+      "message": "secret found",
+      "file_path": "tmp\\47166740-3421-45ab-b0f8-81cd28d8d6f7\\test\\api\\userApiSpec.ts",
+      "line_start": 302,
+      "line_end": 302,
+      "package_name": null,
+      "installed_version": null,
+      "fixed_version": null,
+      "references": null
+    },
+    {
+      "source": "trufflehog",
+      "category": "secret",
+      "severity": "critical",
+      "confidence": "high",
+      "identifier": "1039",
+      "message": "secret found",
+      "file_path": "tmp\\47166740-3421-45ab-b0f8-81cd28d8d6f7\\test\\server\\currentUserSpec.ts",
+      "line_start": 33,
+      "line_end": 33,
+      "package_name": null,
+      "installed_version": null,
+      "fixed_version": null,
+      "references": null
+    },
+    {
+      "source": "trufflehog",
+      "category": "secret",
+      "severity": "critical",
+      "confidence": "high",
+      "identifier": "15",
+      "message": "secret found",
+      "file_path": "tmp\\47166740-3421-45ab-b0f8-81cd28d8d6f7\\lib\\insecurity.ts",
+      "line_start": 23,
+      "line_end": 23,
+      "package_name": null,
+      "installed_version": null,
+      "fixed_version": null,
+      "references": null
+    }
+  ]
+}

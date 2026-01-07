@@ -34,8 +34,14 @@ from normalizers.trufflehog_normalizer import TruffleHogNormalizer
 
 from engine.risk_engine import RiskEngine
 
+# ----------------------
+# Report generator 
+# ----------------------
 
-REPO_URL = "https://github.com/dehvCurtis/vulnerable-code-examples.git"
+from report.report_generator import ReportGenerator
+
+
+REPO_URL = "https://github.com/juice-shop/juice-shop"
 
 
 def main():
@@ -109,7 +115,16 @@ def main():
             print("\nReasons:")
             for r in decision["reasons"]:
                 print(f"- {r}")
-
+        # ============================================================
+        # Report Generation
+        # ============================================================            
+        
+        json_report = ReportGenerator.to_json(all_findings, decision)
+        md_report = ReportGenerator.to_markdown(all_findings, decision)
+        
+        print("\nReport Generated:")
+        print(f"- {json_report}")
+        print(f"- {md_report}")
     finally:
         RepoManager.cleanup(repo_path)
 

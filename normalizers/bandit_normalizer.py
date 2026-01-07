@@ -11,8 +11,6 @@ class BanditNormalizer:
             if "/tests/" in f.file_path.replace("\\", "/"):
                 continue
             
-            if f.severity.lower() == "low":
-                continue
             
             unified = UnifiedFinding(
                 source="bandit", 
