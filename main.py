@@ -40,6 +40,14 @@ from engine.risk_engine import RiskEngine
 
 from report.report_generator import ReportGenerator
 
+# ----------------------
+# LLM - Gemini
+# ----------------------
+from llm.llm import GeminiClient
+from llm.assessment_prompt import AssessmentPromptBuilder
+
+import json
+
 
 REPO_URL = "https://github.com/juice-shop/juice-shop"
 
@@ -84,6 +92,7 @@ def main():
         trufflehog_parser = TruffleHogParser()
 
         secret_raw = trufflehog_runner.run(repo_path)
+        print(secret_raw)
         secret_findings = trufflehog_parser.parse(secret_raw)
         secret_unified = TruffleHogNormalizer.normalize(secret_findings)
 
@@ -125,6 +134,20 @@ def main():
         print("\nReport Generated:")
         print(f"- {json_report}")
         print(f"- {md_report}")
+        
+        # ============================================================
+        # LLM Report
+        # ============================================================    
+        
+        with open(json_report, "r", encoding="utf-8") as f:
+            security_report = json.load(f)
+
+        prompt = AssessmentPromptBuilder.build(security_report)
+        assessment = GeminiClient.analyze(prompt)
+
+        print("\n=== LLM Security Assessment ===\n")
+        print(assessment)
+        
     finally:
         RepoManager.cleanup(repo_path)
 

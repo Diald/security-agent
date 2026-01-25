@@ -12,6 +12,9 @@ class TruffleHogParser:
             # --- Extract metadata safely ---
             detector = item.get("DetectorName")
             secret_type = str(item.get("DetectorType") or detector or "unknown")
+            detector_description = item.get("DetectorDescription")
+            secret = item.get("Raw")
+            decoder = item.get("DecoderName")
 
             source_metadata = item.get("SourceMetadata", {})
             file_path = source_metadata.get("Data", {}).get("Filesystem", {}).get("file")
@@ -39,6 +42,7 @@ class TruffleHogParser:
                     tool="trufflehog",
                     secret_type=secret_type,
                     detector=detector,
+                    detector_description=detector_description,
                     file_path=file_path or "unknown",
                     line_start=line,
                     line_end=line,
@@ -47,6 +51,8 @@ class TruffleHogParser:
                     severity=severity,
                     confidence=confidence,
                     message=item.get("Description"),
+                    secret=secret, 
+                    decoder=decoder,
                 )
             )
 

@@ -14,13 +14,20 @@
       "confidence": "high",
       "identifier": "1039",
       "message": "secret found",
-      "file_path": "tmp\\47166740-3421-45ab-b0f8-81cd28d8d6f7\\test\\api\\userApiSpec.ts",
+      "file_path": "test/api/userApiSpec.ts",
       "line_start": 302,
       "line_end": 302,
       "package_name": null,
       "installed_version": null,
       "fixed_version": null,
-      "references": null
+      "references": null,
+      "verified": false,
+      "secret_type": "1039",
+      "detector": "JWT",
+      "detector_description": "A JSON Web Token (JWT) is an approach to authentication or authorization that does not depend on server-side data. It may allow access to protected resources.",
+      "secret": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6MSwidXNlcm5hbWUiOiIiLCJlbWFpbCI6ImFkbWluQGp1aWNlLXNoLm9wIiwicGFzc3dvcmQiOiIwMTkyMDIzYTdiYmQ3MzI1MDUxNmYwNjlkZjE4YjUwMCIsInJvbGUiOiJhZG1pbiIsImxhc3RMb2dpbklwIjoiMC4wLjAuMCIsInByb2ZpbGVJbWFnZSI6ImRlZmF1bHQuc3ZnIiwidG90cFNlY3JldCI6IiIsImlzQWN0aXZlIjp0cnVlLCJjcmVhdGVkQXQiOiIyMDE5LTA4LTE5IDE1OjU2OjE1LjYyOSArMDA6MDAiLCJ1cGRhdGVkQXQiOiIyMDE5LTA4LTE5IDE1OjU2OjE1LjYyOSArMDA6MDAiLCJkZWxldGVkQXQiOm51bGx9LCJpYXQiOjE1NjYyMzAyMjQsImV4cCI6MTU2NjI0ODIyNH0.FL0kkcInY5sDMGKeLHfEOYDTQd3BjR6_mK7Tcm_RH6iCLotTSRRoRxHpLkbtIQKqBFIt14J4BpLapkzG7ppRWcEley5nego-4iFOmXQvCBz5ISS3HdtM0saJnOe0agyVUen3huFp4F2UCth_y2ScjMn_4AgW66cz8NSFPRVpC8g",
+      "decoder": "PLAIN",
+      "evidence": null
     },
     {
       "source": "trufflehog",
@@ -29,13 +36,20 @@
       "confidence": "high",
       "identifier": "1039",
       "message": "secret found",
-      "file_path": "tmp\\47166740-3421-45ab-b0f8-81cd28d8d6f7\\test\\server\\currentUserSpec.ts",
+      "file_path": "test/server/currentUserSpec.ts",
       "line_start": 33,
       "line_end": 33,
       "package_name": null,
       "installed_version": null,
       "fixed_version": null,
-      "references": null
+      "references": null,
+      "verified": false,
+      "secret_type": "1039",
+      "detector": "JWT",
+      "detector_description": "A JSON Web Token (JWT) is an approach to authentication or authorization that does not depend on server-side data. It may allow access to protected resources.",
+      "secret": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJkYXRhIjp7ImlkIjoxLCJlbWFpbCI6ImFkbWluQGp1aWNlLXNoLm9wIiwibGFzdExvZ2luSXAiOiIwLjAuMC4wIiwicHJvZmlsZUltYWdlIjoiZGVmYXVsdC5zdmcifSwiaWF0IjoxNTgyMjIyMzY0fQ.CHiFQieZudYlrd1o8Ih-Izv7XY_WZupt8Our-CP9HqsczyEKqrWC7wWguOgVuSGDN_S3mP4FyuEFN8l60aAhVsUbqzFetvJkFwe5nKVhc9dHuen6cujQLMcTlHLKassOSDP41Q-MkKWcUOQu0xUkTMfEq2hPMHpMosDb4benzH0",
+      "decoder": "PLAIN",
+      "evidence": null
     },
     {
       "source": "trufflehog",
@@ -44,13 +58,20 @@
       "confidence": "high",
       "identifier": "15",
       "message": "secret found",
-      "file_path": "tmp\\47166740-3421-45ab-b0f8-81cd28d8d6f7\\lib\\insecurity.ts",
+      "file_path": "lib/insecurity.ts",
       "line_start": 23,
       "line_end": 23,
       "package_name": null,
       "installed_version": null,
       "fixed_version": null,
-      "references": null
+      "references": null,
+      "verified": false,
+      "secret_type": "15",
+      "detector": "PrivateKey",
+      "detector_description": "Private keys are used for securely connecting and authenticating to various systems and services. Exposure of private keys can lead to unauthorized access and data breaches.",
+      "secret": "-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQDNwqLEe9wgTXCbC7+RPdDbBbeqjdbs4kOPOIGzqLpXvJXlxxW8iMz0EaM4BKUqYsIa+ndv3NAn2RxCd5ubVdJJcX43zO6Ko0TFEZx/65gY3BE0O6syCEmUP4qbSd6exou/F+WTISzbQ5FBVPVmhnYhG/kpwt/cIxK5iUn5hm+4tQIDAQABAoGBAI+8xiPoOrA+KMnG/T4jJsG6TsHQcDHvJi7o1IKC/hnIXha0atTX5AUkRRce95qSfvKFweXdJXSQ0JMGJyfuXgU6dI0TcseFRfewXAa/ssxAC+iUVR6KUMh1PE2wXLitfeI6JLvVtrBYswm2I7CtY0q8n5AGimHWVXJPLfGV7m0BAkEA+fqFt2LXbLtyg6wZyxMA/cnmt5Nt3U2dAu77MzFJvibANUNHE4HPLZxjGNXN+a6m0K6TD4kDdh5HfUYLWWRBYQJBANK3carmulBwqzcDBjsJ0YrIONBpCAsXxk8idXb8jL9aNIg15Wumm2enqqObahDHB5jnGOLmbasizvSVqypfM9UCQCQl8xIqy+YgURXzXCN+kwUgHinrutZms87Jyi+D8Br8NY0+Nlf+zHvXAomD2W5CsEK7C+8SLBr3k/TsnRWHJuECQHFE9RA2OP8WoaLPuGCyFXaxzICThSRZYluVnWkZtxsBhW2W8z1b8PvWUE7kMy7TnkzeJS2LSnaNHoyxi7IaPQUCQCwWU4U+v4lD7uYBw00Ga/xt+7+UqFPlPVdz1yyr4q24Zxaw0LgmuEvgU5dycq8N7JxjTubX0MIRR+G9fmDBBl8=\n-----END RSA PRIVATE KEY-----\n",
+      "decoder": "PLAIN",
+      "evidence": null
     }
   ]
 }

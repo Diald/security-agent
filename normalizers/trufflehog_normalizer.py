@@ -17,6 +17,13 @@ class TruffleHogNormalizer:
                 file_path=f.file_path,
                 line_start=f.line_start,
                 line_end=f.line_end,
+                references=f.message,
+                detector=f.detector,
+                secret_type=f.secret_type,
+                verified=f.verified,
+                detector_description=f.detector_description,
+                secret=f.secret,
+                decoder=f.decoder,
             )
 
             normalized.append(unified)

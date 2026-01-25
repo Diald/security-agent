@@ -31,6 +31,9 @@ class SecretFinding(BaseModel):
     tool: str
     secret_type: str
     detector: Optional[str]
+    detector_description: Optional[str]
+    secret: Optional[str]
+    decoder: Optional[str]
     
     file_path: str
     line_start: Optional[int]
@@ -63,3 +66,13 @@ class UnifiedFinding(BaseModel):
     fixed_version: Optional[str] = None
     
     references: Optional[List[str]] = None
+    verified: Optional[bool] = None
+    secret_type: Optional[str] = None
+    detector: Optional[str] = None
+    detector_description: Optional[str] = None
+    secret: Optional[str] = None
+    decoder: Optional[str] = None
+    
+    
+    evidence: Optional[str] = None # to store the code snippet which
+    # has the vulnerability to avoid context loss in llm later on

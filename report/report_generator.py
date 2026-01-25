@@ -1,22 +1,42 @@
 import json
 from core.models import UnifiedFinding
+import os
 
+def normalize_path(path: str) -> str:
+        if not path: 
+            return path
+        parts = path.replace("\\", "/").split("/")
+        if "tmp" in parts: 
+            idx = parts.index("tmp")
+            parts = parts[idx+2:]
+        return "/".join(parts)
 class ReportGenerator:
     
     @staticmethod
     def to_json(
         findings: list[UnifiedFinding],
-        decision: dict, 
+        decision: dict,
         output_path: str = "security_report.json",
     ):
+        clean_findings = []
+
+        for f in findings:
+            data = f.model_dump()
+            if data.get("file_path"):
+                data["file_path"] = normalize_path(data["file_path"])
+            clean_findings.append(data)
+
         report = {
-            "summary": decision, 
-            "findings": [f.model_dump() for f in findings],
+            "summary": decision,
+            "findings": clean_findings,
         }
+
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2)
-            
+
         return output_path
+
+    
     
     @staticmethod
     def to_markdown(
@@ -46,6 +66,7 @@ class ReportGenerator:
             lines.append(f"- **Message:** {f.message}")
             
             if f.file_path:
+                f.file_path = normalize_path(f.file_path)
                 lines.append(f"- **File:** {f.file_path}")
                 if f.line_start:
                     lines.append(f"- **Lines:** {f.line_start}")
@@ -65,4 +86,3 @@ class ReportGenerator:
             f.write("\n".join(lines))
             
         return output_path
-                    
