@@ -18,17 +18,9 @@ Analyze the provided JSON security report. You must identify risks and provide *
 2. **Actionable**: For every risk mentioned, you MUST provide a remediation step.
 3. **No Hallucinations**: If the report is empty, state "No vulnerabilities detected."
 4. **Tone**: Professional, technical, and urgent but calm.
+5. Do not repeat or paraphrase the prompt, JSON, or any Python code.
 
 ### OUTPUT STRUCTURE
-
-## 1. Executive Summary
-- **Security Score**: [0-100]
-- **Posture**: [Low / Medium / High / Critical]
-- **Verdict**: [DEPLYABLE / BLOCKED]
-- **Summary**: 3 sentences for leadership.
-
-## 2. Top Security Findings & Remediation
-For the top 3 critical issues, provide:
 
 ### [Finding Name] ([Category: SAST/SCA/Secret])
 - **Impact**: Why is this dangerous?
@@ -37,18 +29,20 @@ For the top 3 critical issues, provide:
     - **Step**: Exact instruction (e.g., "Update package X to version Y").
     - **Code/Command**: Provide a code snippet or terminal command to fix it.
 
-## 3. Vulnerability Breakdown
+## Vulnerability Breakdown
 - **Code (SAST)**: [Summary of Bandit findings]
 - **Dependencies (SCA)**: [Summary of OSV findings]
 - **Secrets**: [Summary of TruffleHog findings]
 
-## 4. Immediate Action Plan (Next 24 Hours)
+## Immediate Action Plan (Next 24 Hours)
 1. [Highest Priority Fix]
 2. [Secondary Fix]
 3. [Environment/Process Improvement]
 
 ---
 ### SECURITY REPORT DATA (JSON)
+<BEGIN_JSON>
 {report_json}
+<END_JSON>
 """
         return prompt

@@ -143,6 +143,10 @@ def main():
             security_report = json.load(f)
 
         prompt = AssessmentPromptBuilder.build(security_report)
+        print("==== PROMPT START ====")
+        print(prompt)
+        print("==== PROMPT END ====")
+
         client = GeminiClient()
         assessment = client.analyze(prompt)
 

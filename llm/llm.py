@@ -17,7 +17,7 @@ class GeminiClient:
             config=types.GenerateContentConfig(
                 temperature=0.2,
                 top_p=0.9,
-                max_output_tokens=800,
+                max_output_tokens=4096,
             )
         )
         return response.text
