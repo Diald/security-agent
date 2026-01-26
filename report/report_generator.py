@@ -59,7 +59,7 @@ class ReportGenerator:
         lines.append("## Findings\n")
         
         for f in findings:
-            lines.append(f"### [{f.category.upper()}] {f.identifier or 'Finding'}")
+            lines.append(f"### [{f.category.upper()}] {f.detector or 'Finding'}")
             lines.append(f" - **Source:** {f.source}")
             lines.append(f"- **Severity:** {f.severity}")
             lines.append(f"- **Confidence:** {f.confidence}")

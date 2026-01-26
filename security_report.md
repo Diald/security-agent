@@ -10,7 +10,7 @@
 
 ## Findings
 
-### [SECRET] 1039
+### [SECRET] JWT
  - **Source:** trufflehog
 - **Severity:** critical
 - **Confidence:** high
@@ -18,7 +18,7 @@
 - **File:** test/api/userApiSpec.ts
 - **Lines:** 302
 
-### [SECRET] 1039
+### [SECRET] JWT
  - **Source:** trufflehog
 - **Severity:** critical
 - **Confidence:** high
@@ -26,7 +26,7 @@
 - **File:** test/server/currentUserSpec.ts
 - **Lines:** 33
 
-### [SECRET] 15
+### [SECRET] PrivateKey
  - **Source:** trufflehog
 - **Severity:** critical
 - **Confidence:** high

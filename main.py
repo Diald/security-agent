@@ -143,7 +143,8 @@ def main():
             security_report = json.load(f)
 
         prompt = AssessmentPromptBuilder.build(security_report)
-        assessment = GeminiClient.analyze(prompt)
+        client = GeminiClient()
+        assessment = client.analyze(prompt)
 
         print("\n=== LLM Security Assessment ===\n")
         print(assessment)
