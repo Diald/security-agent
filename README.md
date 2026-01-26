@@ -3,6 +3,8 @@ An automated security vulnerability finder, the agent takes a github url as an i
 1. SAST scanning - Bandit scanner - scans for
 2. SCA scanning - OSV Parser - scans for vulnerable dependencies
 3. Secret scanning - Trufflehog - scans for leaked keys
+
+
 The high level idea is that the repo clones the provided github repo link, stores it temporarily in tmp/ folder, performs the required scans and then generates the llm response and remediation steps and then deleted the repo clone from tmp/ folder, the future considerations for this project is to use a better logic for this, and make use of scanning through api instead of having something like DiDn structure.
 
 Prerequisites- 
