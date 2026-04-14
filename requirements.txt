@@ -1,3 +1,4 @@
-pydantic
-semgrep
-GitPython
+bandit
+PyGithub
+gitpython
+google-generativeai

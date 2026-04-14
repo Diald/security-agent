@@ -1,5 +1,3 @@
-from core.repo_manager import RepoManager
-
 # --------------------
 # SAST
 # --------------------
@@ -47,13 +45,15 @@ from llm.llm import GeminiClient
 from llm.assessment_prompt import AssessmentPromptBuilder
 
 import json
-
-
-REPO_URL = "https://github.com/juice-shop/juice-shop"
+import argparse
 
 
 def main():
-    repo_path = RepoManager.clone_repo(REPO_URL)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-path", required=True, help="Path to the repo that needs to be scanned")
+    args = parser.parse_args()
+    
+    repo_path = args.repo_path
 
     try:
         # ============================================================
@@ -66,10 +66,10 @@ def main():
         sast_findings = bandit_parser.parse(bandit_raw)
         bandit_unified = BanditNormalizer.normalize(sast_findings)
 
-        # print("\n=== SAST Findings (Bandit) ===")
+        print("\n=== SAST Findings (Bandit) ===")
         
-        # for f in bandit_unified:
-        #     print(f)
+        for f in bandit_unified:
+            print(f)
 
         # ============================================================
         # Supply Chain — OSV
@@ -96,15 +96,32 @@ def main():
         secret_findings = trufflehog_parser.parse(secret_raw)
         secret_unified = TruffleHogNormalizer.normalize(secret_findings)
 
-        # print("\n=== Secret Findings (TruffleHog) ===")
-        # for f in secret_unified:
-        #     print(f)
+        print("\n=== Secret Findings (TruffleHog) ===")
+        for f in secret_unified:
+            print(f)
             
         # ============================================================
         # ALL FINDINGS UNIFORMED 
         # ============================================================
         
-        all_findings = bandit_unified + osv_unified + secret_unified
+        EXCLUDED_PATH_PATTERNS = [
+            "node_modules",
+            ".git",
+            "vendor",
+            "__pycache__",
+            ".venv",
+            "dist",
+            "build",
+        ]
+
+        def is_excluded(file_path: str) -> bool:
+            if not file_path:
+                return False
+            normalized = file_path.replace("\\", "/")
+            return any(pattern in normalized for pattern in EXCLUDED_PATH_PATTERNS)
+        
+        sum_all = bandit_unified + osv_unified + secret_unified
+        all_findings = [f for f in sum_all if not is_excluded(f.file_path)]
         
         print("\n=== Unified Findings ===")
         for f in all_findings:
@@ -153,9 +170,8 @@ def main():
         print("\n=== LLM Security Assessment ===\n")
         print(assessment)
         
-    finally:
-        RepoManager.cleanup(repo_path)
-
+    except Exception as e:
+        print(f"[!] An error occurred: {str(e)}")
 
 if __name__ == "__main__":
     main()

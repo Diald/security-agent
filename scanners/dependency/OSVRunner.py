@@ -1,17 +1,18 @@
 import subprocess
 import json
-
+import os
 
 class OSVRunner:
     def run(self, repo_path: str) -> dict:
         """
-        Runs osv-scanner against a repository directory and returns raw JSON output.
-
-        Behavior:
-        - Skips cleanly if no dependency manifests are found
-        - Returns empty results for valid 'no dependency' cases
-        - Raises only on real execution failures
+        Runs osv-scanner with optimizations for speed and feedback.
         """
+        # 1. Check if path exists to avoid pointless subprocess calls
+        if not os.path.exists(repo_path):
+            return {"results": []}
+
+        print(f"[*] Starting OSV scan on: {repo_path}...")
+        print(f"[*] (This may take a minute for large repositories)")
 
         cmd = [
             "osv-scanner",
@@ -21,38 +22,37 @@ class OSVRunner:
             repo_path
         ]
 
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace"
-        )
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace"
+            )
+        except FileNotFoundError:
+            raise RuntimeError("osv-scanner not found. Is it installed and in your PATH?")
 
         stderr = result.stderr.lower()
 
-        # --- CASE 1: No dependencies present (VALID, NON-FATAL) ---
         if "no package sources found" in stderr:
+            print("[!] No dependency manifests found. Skipping.")
             return {"results": []}
 
-        # osv-scanner exit codes:
-        # 0 → no vulnerabilities
-        # 1 → vulnerabilities found
         if result.returncode not in (0, 1):
             raise RuntimeError(
-                f"OSV-Scanner failed.\nSTDERR:\n{result.stderr}"
+                f"OSV-Scanner failed with exit code {result.returncode}.\n"
+                f"STDERR: {result.stderr}"
             )
 
-        # --- CASE 2: Valid execution but no output ---
         if not result.stdout.strip():
             return {"results": []}
 
-        # --- CASE 3: Normal JSON output ---
         try:
-            return json.loads(result.stdout)
+            data = json.loads(result.stdout)
+            print(f"[+] Scan complete. Found {len(data.get('results', []))} results.")
+            return data
         except json.JSONDecodeError as e:
             raise RuntimeError(
-                "OSV-Scanner produced invalid JSON.\n"
-                f"STDOUT:\n{result.stdout}\n\n"
-                f"STDERR:\n{result.stderr}"
+                f"OSV-Scanner produced invalid JSON.\nSTDOUT: {result.stdout}"
             ) from e
