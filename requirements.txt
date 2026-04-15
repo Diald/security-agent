@@ -2,3 +2,5 @@ bandit
 PyGithub
 gitpython
 google-generativeai
+requests
+pydantic
