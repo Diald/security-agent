@@ -1,0 +1,38 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build Docker image
+      run: docker build -t security-agent .
+
+    - name: Run security scan
+      run: |
+        mkdir -p reports
+        docker run \
+          --rm \
+          -v ${{ github.workspace }}:/repo \
+          -v ${{ github.workspace }}/reports:/reports \
+          security-agent --repo-path /repo
+
+    - name: Upload reports
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: reports/
