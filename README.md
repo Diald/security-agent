@@ -33,4 +33,13 @@ What happens next:Clone: The RepoManager clones the target repo to a temporary d
 ├── report/             # Markdown and JSON report generators
 ├── main.py             # Application entry point
 └── requirements.txt    # Project dependencies
-🛡️ Example AI OutputThe agent doesn't just list bugs; it provides:Overall Security Posture: (e.g., "Critical - Immediate action required")Release Readiness: (e.g., "BLOCKED - High risk of SQL injection")Actionable Remediation: Specific code snippets to fix the identified vulnerabiliti
+🛡️ Example AI OutputThe agent doesn't just list bugs; it provides:Overall Security Posture: (e.g., "Critical - Immediate action required")Release Readiness: (e.g., "BLOCKED - High risk of SQL injection")Actionable Remediation: Specific code snippets to fix the identified vulnerability
+
+## Installation 
+``` bash 
+pip install security-agent
+
+## Usage
+ security-agent --repo-path /path/to/repo
+
+ 
