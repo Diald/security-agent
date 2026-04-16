@@ -31,19 +31,26 @@ jobs:
 
     - name: Install osv-scanner
       run: |
-        curl -L https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 \
+        OSV_VERSION=$(curl -s https://api.github.com/repos/google/osv-scanner/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+        echo "Installing osv-scanner ${OSV_VERSION}"
+        curl -fsSL "https://github.com/google/osv-scanner/releases/download/${OSV_VERSION}/osv-scanner_linux_amd64" \
           -o /usr/local/bin/osv-scanner
         chmod +x /usr/local/bin/osv-scanner
+        osv-scanner --version
 
     - name: Install TruffleHog
       run: |
         curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh \
           | sh -s -- -b /usr/local/bin
+        trufflehog --version
 
-    - name: Verify tools
+    - name: Verify all tools
       run: |
+        echo "--- bandit ---"
         bandit --version
+        echo "--- osv-scanner ---"
         osv-scanner --version
+        echo "--- trufflehog ---"
         trufflehog --version
 
     - name: Run security scan
