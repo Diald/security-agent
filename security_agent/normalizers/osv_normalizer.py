@@ -1,4 +1,4 @@
-from core.models import UnifiedFinding, DependencyFinding
+from ..core.models import UnifiedFinding, DependencyFinding
 
 class OSVNormalizer:
 

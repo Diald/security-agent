@@ -1,4 +1,4 @@
-from core.models import UnifiedFinding
+from ..core.models import UnifiedFinding
 
 class RiskEngine:
 

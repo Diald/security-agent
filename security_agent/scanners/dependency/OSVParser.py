@@ -1,5 +1,5 @@
 from typing import List
-from core.models import DependencyFinding
+from ...core.models import DependencyFinding
 
 
 class OSVParser:

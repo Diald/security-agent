@@ -1,5 +1,5 @@
 import json
-from core.models import UnifiedFinding
+from ..core.models import UnifiedFinding
 import os
 
 def normalize_path(path: str) -> str:

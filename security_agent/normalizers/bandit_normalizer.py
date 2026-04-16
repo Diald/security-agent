@@ -1,4 +1,4 @@
-from core.models import UnifiedFinding, SASTFinding
+from ..core.models import UnifiedFinding, SASTFinding
 
 class BanditNormalizer: 
     

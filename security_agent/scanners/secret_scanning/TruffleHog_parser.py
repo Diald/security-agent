@@ -1,5 +1,5 @@
 from typing import List
-from core.models import SecretFinding
+from ...core.models import SecretFinding
 import hashlib
 
 

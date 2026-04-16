@@ -1,5 +1,5 @@
 from typing import List
-from core.models import SASTFinding
+from ...core.models import SASTFinding
 
 
 class BanditParser:
