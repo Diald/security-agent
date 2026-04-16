@@ -23,15 +23,35 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -e .
+        pip install bandit
+
+    - name: Install osv-scanner
+      run: |
+        curl -L https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 \
+          -o /usr/local/bin/osv-scanner
+        chmod +x /usr/local/bin/osv-scanner
+
+    - name: Install TruffleHog
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh \
+          | sh -s -- -b /usr/local/bin
+
+    - name: Verify tools
+      run: |
+        bandit --version
+        osv-scanner --version
+        trufflehog --version
 
     - name: Run security scan
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: |
         mkdir -p reports
-        security-agent --repo-path . --output reports/ --format json
+        security-agent --repo-path . --format json
 
     - name: Upload security reports
       if: always()
@@ -47,29 +67,36 @@ jobs:
       with:
         script: |
           const fs = require('fs');
+          const reportPath = './reports/security_report.json';
+
+          if (!fs.existsSync(reportPath)) {
+            console.log('Report not found, skipping comment');
+            return;
+          }
+
           try {
-            const report = JSON.parse(fs.readFileSync('./reports/security_report.json', 'utf8'));
+            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
             const { summary, findings } = report;
-            
+
             let comment = `## 🔒 Security Scan Results\n\n`;
             comment += `**Status**: ${summary.status === 'FAIL' ? '❌' : '✅'} ${summary.status}\n`;
             comment += `**Score**: ${summary.score}\n`;
             comment += `**Total Findings**: ${findings.length}\n\n`;
-            
+
             if (findings.length > 0) {
               comment += `### Top Issues\n`;
               findings.slice(0, 5).forEach((f, i) => {
                 comment += `${i+1}. **${f.severity.toUpperCase()}** - ${f.message}\n`;
-                comment += `   📄 ${f.file_path}:${f.line_start}\n\n`;
+                comment += `   📄 \`${f.file_path}:${f.line_start}\`\n\n`;
               });
             }
-            
-            github.rest.issues.createComment({
+
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: comment
             });
           } catch (e) {
-            console.log('Report not found or error parsing:', e.message);
+            console.log('Error parsing report:', e.message);
           }
