@@ -1,4 +1,4 @@
-Security Agent (v1.0) 🛡️
+# Security Agent (v1.0) 🛡️
 An automated security vulnerability finder, the agent takes a github url as an input parameter and scans the repository on the following bases - 
 1. SAST scanning - Bandit scanner - scans for
 2. SCA scanning - OSV Parser - scans for vulnerable dependencies
