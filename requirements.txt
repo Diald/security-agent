@@ -1,6 +1,6 @@
-bandit
+bandit==1.7.9
 PyGithub
 gitpython
 google-generativeai
-requests
+requests==2.32.3
 pydantic

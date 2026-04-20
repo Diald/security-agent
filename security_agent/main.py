@@ -1,6 +1,10 @@
 import json
 import argparse
 import os
+import logging
+logger = logging.getLogger(__name__)
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # --------------------
 # SAST
@@ -46,53 +50,79 @@ try:
     HAS_LLM = True
 except ImportError:
     HAS_LLM = False
+    
+def _run_bandit(repo_path):
+    logger.info("[*] Running SAST scan (Bandit)...")
+    runner = BanditRunner()
+    parser = BanditParser()
+    raw = runner.run(repo_path)
+    findings = parser.parse(raw)
+    unified = BanditNormalizer.normalize(findings)
+    logger.info(f"[+] Found {len(unified)} SAST issues")
+    return unified
 
+def _run_osv(repo_path):
+    logger.info("[*] Running dependency scan (OSV)...")
+    runner = OSVRunner()
+    parser = OSVParser()
+    raw = runner.run(repo_path)
+    findings = parser.parse(raw)
+    unified = OSVNormalizer.normalize(findings)
+    logger.info(f"[+] Found {len(unified)} dependency issues")
+    return unified
+
+def _run_trufflehog(repo_path):
+    logger.info("[*] Running secret scan (TruffleHog)...")
+    runner = TruffleHogRunner()
+    parser = TruffleHogParser()
+    raw = runner.run(repo_path)
+    findings = parser.parse(raw)
+    unified = TruffleHogNormalizer.normalize(findings)
+    logger.info(f"[+] Found {len(unified)} secret issues")
+    return unified
 
 def run_scan(repo_path: str, output_dir: str = "reports/", report_format: str = "json", db_url: str = None):
     """Main scanning function - returns report dict"""
     
-    print(f"\n[*] Starting security scan on: {repo_path}")
+    logger.info(f"\n[*] Starting security scan on: {repo_path}")
     
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
     
     try:
         # ============================================================
-        # SAST — Bandit
+        # Run all scanners in parallel
         # ============================================================
-        print("[*] Running SAST scan (Bandit)...")
-        bandit_runner = BanditRunner()
-        bandit_parser = BanditParser()
+        scanners = {
+            "bandit":     _run_bandit,
+            "osv":        _run_osv,
+            "trufflehog": _run_trufflehog,
+            }
 
-        bandit_raw = bandit_runner.run(repo_path)
-        sast_findings = bandit_parser.parse(bandit_raw)
-        bandit_unified = BanditNormalizer.normalize(sast_findings)
-        print(f"[+] Found {len(bandit_unified)} SAST issues")
+        all_results = {"bandit": [], "osv": [], "trufflehog": []}
+        failed = []
 
-        # ============================================================
-        # Supply Chain — OSV
-        # ============================================================
-        print("[*] Running dependency scan (OSV)...")
-        osv_runner = OSVRunner()
-        osv_parser = OSVParser()
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = {
+                executor.submit(fn, repo_path): name
+                for name, fn in scanners.items()
+            }
 
-        osv_raw = osv_runner.run(repo_path)
-        dep_findings = osv_parser.parse(osv_raw)
-        osv_unified = OSVNormalizer.normalize(dep_findings)
-        print(f"[+] Found {len(osv_unified)} dependency issues")
+            for future in as_completed(futures):
+                name = futures[future]
+                try:
+                    all_results[name] = future.result()
+                except Exception as e:
+                    logger.info(f"[!] {name} scanner failed: {e}")
+                    failed.append(name)
 
-        # ============================================================
-        # Secrets — TruffleHog
-        # ============================================================
-        print("[*] Running secret scan (TruffleHog)...")
-        trufflehog_runner = TruffleHogRunner()
-        trufflehog_parser = TruffleHogParser()
+        if failed:
+            logger.info(f"[!] Scanners that failed: {', '.join(failed)}")
 
-        secret_raw = trufflehog_runner.run(repo_path)
-        secret_findings = trufflehog_parser.parse(secret_raw)
-        secret_unified = TruffleHogNormalizer.normalize(secret_findings)
-        print(f"[+] Found {len(secret_unified)} secret issues")
-            
+        bandit_unified     = all_results["bandit"]
+        osv_unified        = all_results["osv"]
+        secret_unified = all_results["trufflehog"]
+
         # ============================================================
         # ALL FINDINGS FILTERED
         # ============================================================
@@ -116,16 +146,16 @@ def run_scan(repo_path: str, output_dir: str = "reports/", report_format: str = 
         sum_all = bandit_unified + osv_unified + secret_unified
         all_findings = [f for f in sum_all if not is_excluded(f.file_path)]
         
-        print(f"\n[*] Total findings (after filtering): {len(all_findings)}")
+        logger.info(f"\n[*] Total findings (after filtering): {len(all_findings)}")
             
         # ============================================================
         # Risk evaluation
         # ============================================================            
-        print("[*] Running risk evaluation...")
+        logger.info("[*] Running risk evaluation...")
         decision = RiskEngine.evaluate(all_findings)
 
-        print(f"[+] Status: {decision['status']}")
-        print(f"[+] Score: {decision['score']}")
+        logger.info(f"[+] Status: {decision['status']}")
+        logger.info(f"[+] Score: {decision['score']}")
 
         # ============================================================
         # Report Generation
@@ -137,8 +167,8 @@ def run_scan(repo_path: str, output_dir: str = "reports/", report_format: str = 
         ReportGenerator.to_json(all_findings, decision, json_report_path)
         ReportGenerator.to_markdown(all_findings, decision, md_report_path)
         
-        print(f"[+] JSON report: {json_report_path}")
-        print(f"[+] Markdown report: {md_report_path}")
+        logger.info(f"[+] JSON report: {json_report_path}")
+        logger.info(f"[+] Markdown report: {md_report_path}")
         
         # ============================================================
         # LLM Assessment (Optional)
@@ -147,16 +177,16 @@ def run_scan(repo_path: str, output_dir: str = "reports/", report_format: str = 
         assessment = "Manual review required"
         if HAS_LLM:
             try:
-                print("[*] Running LLM assessment (Gemini)...")
+                logger.info("[*] Running LLM assessment (Gemini)...")
                 with open(json_report_path, "r", encoding="utf-8") as f:
                     security_report = json.load(f)
 
                 prompt = AssessmentPromptBuilder.build(security_report)
                 client = GeminiClient()
                 assessment = client.analyze(prompt)
-                print("[+] LLM assessment complete")
+                logger.info("[+] LLM assessment complete")
             except Exception as e:
-                print(f"[!] LLM assessment failed: {e}")
+                logger.error(f"[!] LLM assessment failed: {e}")
                 assessment = "Manual review required"
         
         # ============================================================
@@ -172,7 +202,7 @@ def run_scan(repo_path: str, output_dir: str = "reports/", report_format: str = 
         return report
         
     except Exception as e:
-        print(f"[!] An error occurred: {str(e)}")
+        logger.error(f"[!] An error occurred: {str(e)}")
         import traceback
         traceback.print_exc()
         raise
@@ -198,17 +228,17 @@ def main():
             db_url=args.db_url
         )
         
-        print("\n" + "="*60)
-        print(f"Status: {report['summary']['status']}")
-        print(f"Score: {report['summary']['score']}")
-        print(f"Total Findings: {len(report['findings'])}")
-        print("="*60)
+        logger.info("\n" + "="*60)
+        logger.info(f"Status: {report['summary']['status']}")
+        logger.info(f"Score: {report['summary']['score']}")
+        logger.info(f"Total Findings: {len(report['findings'])}")
+        logger.info("="*60)
         
         exit_code = 0 if report['summary']['status'] == 'PASS' else 1
         return exit_code
         
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        logger.error(f"\n❌ Error: {e}")
         import traceback
         traceback.print_exc()
         return 1
