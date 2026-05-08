@@ -1,45 +1,227 @@
-# Security Agent (v1.0) 🛡️
-An automated security vulnerability finder, the agent takes a github url as an input parameter and scans the repository on the following bases - 
-1. SAST scanning - Bandit scanner - scans for
-2. SCA scanning - OSV Parser - scans for vulnerable dependencies
-3. Secret scanning - Trufflehog - scans for leaked keys
+# 🔒 Security Agent
 
+A comprehensive, multi-scanner security tool that automates vulnerability detection in your codebase. Combines **Bandit** (SAST), **osv-scanner** (SCA), and **TruffleHog** (secrets detection) with AI-powered insights.
 
-The high level idea is that the repo clones the provided github repo link, stores it temporarily in tmp/ folder, performs the required scans and then generates the llm response and remediation steps and then deleted the repo clone from tmp/ folder, the future considerations for this project is to use a better logic for this, and make use of scanning through api instead of having something like DiDn structure.
+## Features
 
-Prerequisites- 
-Python 3.10+
+✅ **Multi-Scanner Support**
+- Static Application Security Testing (SAST) with Bandit
+- Software Composition Analysis (SCA) with osv-scanner
+- Secret/credential scanning with TruffleHog
+
+✅ **Unified Reporting**
+- Aggregated JSON reports with normalized findings
+- Severity scoring and prioritization
+- Detailed file locations and line numbers
+
+✅ **AI-Powered Insights**
+- Google Generative AI integration for vulnerability analysis
+- Contextual remediation suggestions
+- Automated risk assessment
+
+✅ **CI/CD Ready**
+- GitHub Actions workflow included
+- Automatic PR comments with security summaries
+- Artifact retention for compliance
+
+✅ **Enterprise Features**
+- Database support (PostgreSQL) for findings storage
+- Flask REST API for integrations
+- CORS-enabled for cross-origin requests
+
+## Installation
+
+### Prerequisites
+- Python 3.10+
+- pip or conda
+
+### From Source
+
+```bash
+git clone https://github.com/Diald/security-agent.git
 cd security-agent
-Set up a virtual environment:Bashpython -m venv env
-# Windows:
-.\env\Scripts\activate
-# Linux/Mac:
-source env/bin/activate
+pip install -e .
+```
 
-Install dependencies:Bashpip install -r requirements.txt
+### Required External Tools
 
-Configure environment variables:Create a file named variables.env in the root directory and add your Gemini API key:Code snippetGEMINI_API_KEY=your_api_key_here
+The following tools are installed automatically in CI/CD:
+- `bandit` - Python code analysis
+- `osv-scanner` - Dependency vulnerability scanning
+- `trufflehog` - Secret detection
 
-🚀 UsageTo start a scan, simply run the main script. You can modify the REPO_URL inside main.py to target any public GitHub repository.Bashpython main.py
+## Quick Start
 
-What happens next:Clone: The RepoManager clones the target repo to a temporary directory.Scan: Bandit, OSV, and TruffleHog run in parallel/sequence.Normalize: Findings are unified into a standard JSON format.Evaluate: The RiskEngine calculates a base security score.AI Analysis: Gemini reviews the findings and outputs a markdown report with remediation steps.Cleanup: The cloned repository is deleted to save space.
+### Command Line Usage
 
-📂 Project StructurePlaintextsecurity-agent/
-├── core/               # Contains pydantic models and repository cloning algorithm
-├── scanners/           # Logic for Bandit, OSV, and TruffleHog runners and parsers
-├── normalizers/        # Converters to transform tool output into a unified schema
-├── engine/             # Risk scoring based on the findings
-├── llm/                # Gemini client and prompt engineering templates
-├── report/             # Markdown and JSON report generators
-├── main.py             # Application entry point
-└── requirements.txt    # Project dependencies
-🛡️ Example AI OutputThe agent doesn't just list bugs; it provides:Overall Security Posture: (e.g., "Critical - Immediate action required")Release Readiness: (e.g., "BLOCKED - High risk of SQL injection")Actionable Remediation: Specific code snippets to fix the identified vulnerability
+```bash
+# Run security scan on current directory
+security-agent --repo-path . --format json
 
-## Installation 
-``` bash 
-pip install security-agent
+# Scan specific folder
+security-agent --repo-path ./src --format json --output reports/
 
-## Usage
- security-agent --repo-path /path/to/repo
+# With verbosity
+security-agent --repo-path . --verbose
+```
 
- 
+### CLI Options
+
+```
+--repo-path PATH          Path to scan (default: current directory)
+--format FORMAT           Output format: json, html, csv (default: json)
+--output PATH             Output directory (default: reports/)
+--verbose, -v             Enable verbose logging
+--config FILE             Path to config file
+--api-key KEY            Gemini API key (or set GEMINI_API_KEY env var)
+```
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# Required for AI insights
+export GEMINI_API_KEY=your_gemini_api_key
+
+# Optional: Database
+export DATABASE_URL=postgresql://user:pass@localhost/security_agent
+```
+
+### Tool Configuration
+
+Create a `.security-agent.yml` in your project root:
+
+```yaml
+bandit:
+  exclude_dirs:
+    - tests
+    - venv
+    - node_modules
+  severity: MEDIUM
+
+osv-scanner:
+  lockfile: requirements.txt
+  skip_git: false
+
+trufflehog:
+  only_verified: true
+  json: true
+```
+
+## GitHub Actions Integration
+
+Add to your workflow (`.github/workflows/security-scan.yml`):
+
+```yaml
+- name: Run Security Agent
+  env:
+    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  run: |
+    security-agent --repo-path . --format json
+```
+
+## Output
+
+### JSON Report Structure
+
+```json
+{
+  "summary": {
+    "status": "FAIL",
+    "score": 42,
+    "total_findings": 5,
+    "timestamp": "2026-05-08T10:30:00Z"
+  },
+  "findings": [
+    {
+      "id": "bandit.B101",
+      "severity": "HIGH",
+      "type": "hardcoded_password",
+      "message": "Possible hardcoded password",
+      "file_path": "src/config.py",
+      "line_start": 15,
+      "line_end": 15,
+      "remediation": "Use environment variables or secrets manager",
+      "ai_insight": "This hardcoded credential poses a significant security risk..."
+    }
+  ]
+}
+```
+
+## Architecture
+
+### Components
+
+- **CLI Module** (`cli.py`) - Command-line interface
+- **Scanner Module** (`scanners/`) - Integration with security tools
+- **Reporter Module** (`reporters/`) - Report generation
+- **API Module** (`api/`) - REST endpoints
+- **Database Module** (`db/`) - Vulnerability storage
+
+### Data Flow
+
+```
+Repository → [Bandit, osv-scanner, TruffleHog] → Aggregation → AI Analysis → JSON Report → PR Comment
+```
+
+## Severity Levels
+
+| Level | Description |
+|-------|-------------|
+| CRITICAL | Immediate exploitation risk, deploy hotfix |
+| HIGH | Significant vulnerability, fix in next sprint |
+| MEDIUM | Notable issue, schedule for fixing |
+| LOW | Minor issue or hardening recommendation |
+| INFO | Informational findings |
+
+## API Usage
+
+Start the Flask REST API:
+
+```bash
+security-agent --api --port 5000
+```
+
+### Endpoints
+
+```
+POST /api/scan          - Scan a repository
+GET  /api/findings      - Get recent findings
+GET  /api/health        - Health check
+```
+
+## Troubleshooting
+
+### Gemini API key not found
+```bash
+export GEMINI_API_KEY=your_key
+```
+
+### osv-scanner fails
+Ensure `pip install -e .` was run and tool is in PATH
+
+### Permission denied on TruffleHog install
+The CI/CD workflow handles permissions automatically
+
+## Contributing
+
+Pull requests are welcome! Please follow:
+1. PEP 8 style guidelines
+2. Add tests for new features
+3. Update documentation
+
+## License
+
+MIT License - see LICENSE file
+
+## Support
+
+- 📖 [Issues](https://github.com/Diald/security-agent/issues)
+- 💬 [Discussions](https://github.com/Diald/security-agent/discussions)
+
+---
+
+**Maintained by:** Diald  
+**Latest Version:** 0.1.0  
+**Python:** 3.10+
